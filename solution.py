@@ -58,8 +58,9 @@ def grid_values(grid):
     for c in grid:
         if c in digits:
             chars.append(c)
-        else:
-            chars.append('.')
+        if c == '.':
+            chars.append(digits)
+    assert len(chars) == 81
     return dict(zip(boxes, chars))
         
 
@@ -82,7 +83,7 @@ def eliminate(values):
     for box in solved_values:
         digit = values[box]
         for peer in peers[box]:
-            values[peer] = values[peer].replace(digit, '')
+            assign_value(values, peer, values[peer].replace(digit, ''))
     return values
 
 def only_choice(values):
@@ -90,7 +91,7 @@ def only_choice(values):
         for digit in '12345678':
             dplaces = [box for box in unit if digit in values[box]]
             if len(dplaces) == 1:
-                values[dplaces[0]] = digit
+                assign_value(values, dplaces[0], digit)
     return values
 
 def reduce_puzzle(values):
@@ -115,7 +116,7 @@ def search(values):
     _, chosen_box = min((len(values[s]), s) for s in boxes if len(values[s]) > 1)
     for digit in values[chosen_box]:
         values_child = values.copy()
-        values_child[chosen_box] = digit
+        assign_value(values_child, chosen_box, digit)
         attempt = search(values_child)
         if attempt:
             return attempt
