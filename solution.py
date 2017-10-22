@@ -120,8 +120,8 @@ def reduce_puzzle(values):
     
     while not stalled:
         values = eliminate(values)
+        values = naked_twins(values)
         values = only_choice(values)
-        #values = naked_twins(values)
         
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
         stalled = solved_values_after == solved_values_before
@@ -162,7 +162,8 @@ def solve(grid):
 
 
 if __name__ == '__main__':
-    diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+    diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'  # this works
+    #diag_sudoku_grid = '9.1....8.8.5.7..4.2.4....6...7......5..............83.3..6......9................'  # this works
     display(solve(diag_sudoku_grid))
 
     try:
