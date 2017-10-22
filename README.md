@@ -7,7 +7,7 @@ A: We first find the boxes with two digits. Then we find the peers of these boxe
 
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
-A: In addition to the elimination technique and only-choice technique, we employ the naked-twins technique to reduce the search space for each box. All three techniques are applied repetitively on the sudoku until no changes can be made, then we use the search tecnique to further reduce the search space.
+A: In addition to the elimination technique and only-choice technique, we employ the naked-twins technique to reduce the search space for each box. All three techniques are applied repetitively on the sudoku until no changes can be made, then we use the search technique to further reduce the search space. Also, besides the normal units, we also need to add in the two diagonal units to the unit list.
 
 ### Install
 
