@@ -1,5 +1,24 @@
 assignments = []
 
+
+def cross(A, B):
+    "Cross product of elements in A and elements in B."
+    return [a+b for a in A for b in B]
+
+
+rows = 'ABCDEFGHI'
+cols = '123456789'
+
+boxes = cross(rows, cols)
+
+row_units = [cross(r, cols) for r in rows]
+column_units = [cross(rows, c) for c in cols]
+square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
+unitlist = row_units + column_units + square_units
+units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
+peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
+
+
 def assign_value(values, box, value):
     """
     Please use this function to update your values dictionary!
@@ -15,6 +34,7 @@ def assign_value(values, box, value):
         assignments.append(values.copy())
     return values
 
+
 def naked_twins(values):
     """Eliminate values using the naked twins strategy.
     Args:
@@ -23,25 +43,22 @@ def naked_twins(values):
     Returns:
         the values dictionary with the naked twins eliminated from peers.
     """
-
     # Find all instances of naked twins
+    boxes_with_2digits = [box for box in boxes if len(values[box]) == 2]
+    twins = [(b1, b2) for b1 in boxes_with_2digits for b2 in peers[b1] if values[b1] == values[b2]]
+    
     # Eliminate the naked twins as possibilities for their peers
+    shared_peers = {}
+    for b1, b2 in twins:
+        shared_peers[b1] = list(peers[b1] & peers[b2])
+        
+    for b1, b_list in shared_peers.items():
+        digits = values[b1]
+        for b in b_list:
+            for digit in digits:
+                assign_value(values, b, values[b].replace(digit, ''))
+    return values
 
-def cross(A, B):
-    "Cross product of elements in A and elements in B."
-    return [a+b for a in A for b in B]
-
-rows = 'ABCDEFGHI'
-cols = '123456789'
-
-boxes = cross(rows, cols)
-
-row_units = [cross(r, cols) for r in rows]
-column_units = [cross(rows, c) for c in cols]
-square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
-unitlist = row_units + column_units + square_units
-units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
-peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
 
 def grid_values(grid):
     """
@@ -78,6 +95,7 @@ def display(values):
         if r in 'CF': print(line)
     return
 
+
 def eliminate(values):
     solved_values = [box for box in boxes if len(values[box]) == 1]
     for box in solved_values:
@@ -85,6 +103,7 @@ def eliminate(values):
         for peer in peers[box]:
             assign_value(values, peer, values[peer].replace(digit, ''))
     return values
+
 
 def only_choice(values):
     for unit in unitlist:
@@ -94,12 +113,16 @@ def only_choice(values):
                 assign_value(values, dplaces[0], digit)
     return values
 
+
 def reduce_puzzle(values):
     stalled = False
     solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
+    
     while not stalled:
         values = eliminate(values)
         values = only_choice(values)
+        #values = naked_twins(values)
+        
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
         stalled = solved_values_after == solved_values_before
         solved_values_before = solved_values_after
@@ -107,19 +130,23 @@ def reduce_puzzle(values):
             return False
     return values
 
+
 def search(values):
     values = reduce_puzzle(values)
     if values is False:
         return False
     if all(len(values[s]) == 1 for s in boxes):
         return values
+    
     _, chosen_box = min((len(values[s]), s) for s in boxes if len(values[s]) > 1)
+    
     for digit in values[chosen_box]:
         values_child = values.copy()
         assign_value(values_child, chosen_box, digit)
         attempt = search(values_child)
         if attempt:
             return attempt
+
 
 def solve(grid):
     """
@@ -132,6 +159,7 @@ def solve(grid):
     """
     values = grid_values(grid)
     return search(values)
+
 
 if __name__ == '__main__':
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
